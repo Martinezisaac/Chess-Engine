@@ -1,1 +1,1 @@
-movimientoJugador
+o

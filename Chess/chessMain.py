@@ -7,7 +7,7 @@ from Chess import chessEngine
 # Tablero 
 anchura = 512 #Tamaño px de anchura para el tablero 
 altura = 512 #Tamaño px de altura para el tablero 
-#Tambien es posible utilizar ''400' para la anchura y altura del juego 
+#Tambien es posible utilizar '400' para la anchura y altura del juego 
 dimension = 8 #Cantidad de casillas por fila 
 maxFPS = 15 #Fotogramas para animaciones 
 tamañoCuadros = anchura // dimension #Tamaño de los 64 cuadros para el tablero 
@@ -53,13 +53,17 @@ def dibujarEstadoJuego(pantalla, estadoJuego):
 
 #Funcion principal
 def main():
+    #Variables auxiliares
+    estadoJuego = chessEngine.gameState() #Acceder a la clase "gameState" que esta dentro del archivo "chessEngine" 
+    #GameState es una clase en donde contiene la ubicacion del tablero del juego como un objeto, siendo este una matriz 
+    movimientosValidos = estadoJuego.movimientosValidos() #Lista que contiene los movimientos validos
+    movimientoValido = False #Bandera auxiliar cuando los movimientos son realizados 
+
     #Inicializar el tablero 
     p.init() #Inicializar la libreria 
     pantalla = p.display.set_mode((anchura, altura)) #Definir el tamaño de la pantalla 
     reloj = p.time.Clock()
     pantalla.fill(p.Color("White"))
-    estadoJuego = chessEngine.gameState() #Acceder a la clase "gameState" que esta dentro del archivo "chessEngine" 
-    #GameState es una clase en donde contiene la ubicacion del tablero del juego como un objeto, siendo este una matriz 
     cargarImagenes() #Cargar imagenes 
     print(estadoJuego.tablero)
 
@@ -76,6 +80,8 @@ def main():
 
             if x.type == p.QUIT: #Si el evento es QUIT
                 bandera = False #Salir del ciclo 
+            
+            #Movimiento Mouse
             elif x.type == p.MOUSEBUTTONDOWN: #Entonces se detecto un clic en el tablero 
                 ubicacionMouse = p.mouse.get_pos() #Obtener las coordenadas (x,y) del mouse 
                 fila = ubicacionMouse[1] // tamañoCuadros
@@ -100,11 +106,23 @@ def main():
                 if len(movimientoJugador) == 2: #Si el usuario realizo exactamente dos clics
                     jugada = chessEngine.Movimiento(movimientoJugador[0], movimientoJugador[1], estadoJuego.tablero) #Obtener los dos clics realizados por el usuario 
                     print(jugada.obtenerNotacion()) #Imprimir la notacion de la jugada realizada
-                    estadoJuego.hacerJugada(jugada) #Realizar la jugada 
+                    if jugada in movimientosValidos: #Validar si la jugada esta dentro de la lista de movimientos validos 
+                        estadoJuego.hacerJugada(jugada) #Realizar la jugada
+                        movimientoValido = True #Entonces si se realizo un movimiento valido 
                     
                     #Una vez que la jugada se realizo, las variables se reinician para poder realizar una jugada nuevamente 
                     cuadroSeleccionado = () #Reiniciar cuadro Seleccionado
                     movimientoJugador = [] #Reiniciar el movimiento del jugador 
+            
+            #Movimiento Teclas        
+            elif x.type == p.KEYDOWN: #Si el usuario presiona una tecla
+                if x.key == p.K_z: #Si el usuario presiona Z, entonnces deshacer la ultima jugada 
+                    estadoJuego.deshacerJugada() #Deshacer la ultima jugada realizada en el tablero 
+
+        #Validar si la bandera de movimientos validos fue activada
+        if movimientoValido == True: #Validar si la bandera se activo 
+            movimientosValidos = estadoJuego.movimientosValidos() #Obtener la lista de movimientos validos dentro del estado actual del tablero 
+            movimientoValido = False #Desactivar la banera para la siguiente iteracion 
 
         dibujarEstadoJuego(pantalla, estadoJuego) #Dibujar el estado actual del juego 
         reloj.tick(maxFPS) #El juego no se ejecuta a mas de "maxFPS" fotogramas por segundo 
