@@ -51,11 +51,23 @@ def dibujarEstadoJuego(pantalla, estadoJuego):
     dibujarTablero(pantalla) #Dibujar el tablero
     dibujarPiezas(pantalla, estadoJuego.tablero) #Dibujar las piezas del tablero con la posicion actual
 
+def conocerTurno(contador, listaMovimientos):
+    if len(listaMovimientos) != 0: #Si existe mas de un movimiento, entonces no es la primer jugada
+        #Mandar mensajes para saber de quien es el turno
+        if ((contador % 2) == 1): #Si es impar entonces es el turno de las blancas
+            print("Turnos de las blancas")
+        else: #Si es par, entonces es el turno de las negras
+            print("Turno de las negras")
+    else: #Si no existe un movimiento dentro de la lista, entonces es la primera jugada realizada
+        print("Ya no es posible regresar mas jugadas...")
+        print("Turno de las blancas")
+
 #Funcion principal
 def main():
     #Variables auxiliares
     estadoJuego = chessEngine.gameState() #Acceder a la clase "gameState" que esta dentro del archivo "chessEngine" 
     #GameState es una clase en donde contiene la ubicacion del tablero del juego como un objeto, siendo este una matriz 
+    movimientosValidos = []
     movimientosValidos = estadoJuego.movimientosValidos() #Lista que contiene los movimientos validos
     movimientoValido = False #Bandera auxiliar cuando los movimientos son realizados 
 
@@ -63,11 +75,12 @@ def main():
     p.init() #Inicializar la libreria 
     pantalla = p.display.set_mode((anchura, altura)) #Definir el tamaño de la pantalla 
     reloj = p.time.Clock()
-    pantalla.fill(p.Color("White"))
+    pantalla.fill(p.Color("White")) #Llenar el tablero de piezas blancas
     cargarImagenes() #Cargar imagenes 
-    print(estadoJuego.tablero)
+    # print(estadoJuego.tablero) #Imprimir el tablero de juego 
 
     #Variables auxiliares
+    contador = 1 #Contador auxiliar para mantener el control de turnos 
     bandera = True #Variable auxiliar para el while
     cuadroSeleccionado = () #Tupla que contendra (fila,columna) del cuadro seleccionado por el usuario
     movimientoJugador = [] #Lista para registrar los clics del usuario para realizar la siguiente jugada, por lo tanto [(fila1, columna1), (fila2, columna2)]
@@ -95,7 +108,7 @@ def main():
                     # Si ese es el caso, entonces se realiza la jugada 
 
                 if cuadroSeleccionado == (fila, columna): #Validar si el usuario presiono el mismo cuadro dos veces
-                    # print("Jugada no válida...") #Mensaje de confirmacion al usuario 
+                    print("Jugada no valida, asegurate que los dos clics no sean en el mismo cuadro") #Mensaje de confirmacion al usuario 
                     cuadroSeleccionado = () #Mantener el cuadro seleccionado vacio
                     movimientoJugador = [] #Mantener los clics vacios para no registrar una jugada y permanecer el tablero 
                 else: #Entonces los dos clics del usuario no son del mismo cuadro 
@@ -105,25 +118,44 @@ def main():
 
                 if len(movimientoJugador) == 2: #Si el usuario realizo exactamente dos clics
                     jugada = chessEngine.Movimiento(movimientoJugador[0], movimientoJugador[1], estadoJuego.tablero) #Obtener los dos clics realizados por el usuario 
-                    print(jugada.obtenerNotacion()) #Imprimir la notacion de la jugada realizada
                     if jugada in movimientosValidos: #Validar si la jugada esta dentro de la lista de movimientos validos 
+                        
+                        #Hacer la jugada en el tablero 
+                        print("Movimientos validos antes de hacer la jugada: ", movimientosValidos) 
                         estadoJuego.hacerJugada(jugada) #Realizar la jugada
                         movimientoValido = True #Entonces si se realizo un movimiento valido 
-                    
+
+                    else: #Entonces no se realizo una jugada valida
+                        print("Jugada no valida") #Mensaje de confirmacion al usuario
+
                     #Una vez que la jugada se realizo, las variables se reinician para poder realizar una jugada nuevamente 
                     cuadroSeleccionado = () #Reiniciar cuadro Seleccionado
                     movimientoJugador = [] #Reiniciar el movimiento del jugador 
             
             #Movimiento Teclas        
             elif x.type == p.KEYDOWN: #Si el usuario presiona una tecla
-                if x.key == p.K_z: #Si el usuario presiona Z, entonnces deshacer la ultima jugada 
+                if x.key == p.K_z: #Si el usuario presiona Z, entonces deshacer la ultima jugada 
                     estadoJuego.deshacerJugada() #Deshacer la ultima jugada realizada en el tablero 
+                    movimientosValidos = estadoJuego.movimientosValidos() #Obtener la lista de movimientos validos para el jugador que acaba de deshacer la jugada
+                    movimientoValido = False #Desactivar la bandera
+                    
+                    #Validar si ya no es posible regresar mas jugadas
+                    if estadoJuego.historialMovimientos != 0: #Entonces es posible regresar mas jugadas
+                        contador -= 1
+                        print("Jugada desecha exitosamente...") #Mensaje de confirmacion en la consola
+                        conocerTurno(contador, estadoJuego.historialMovimientos) #Conocer de quien es el turno
+                    else: #Entonces ya no es posible regresar mas jugadas 
+                        print("Usted está en la primera jugada posible")
 
         #Validar si la bandera de movimientos validos fue activada
         if movimientoValido == True: #Validar si la bandera se activo 
+            contador += 1 #Contador auxiliar para conocer de quien es el turno
             movimientosValidos = estadoJuego.movimientosValidos() #Obtener la lista de movimientos validos dentro del estado actual del tablero 
+            print("movimientos validos despues de la jugada: ", movimientosValidos)
             movimientoValido = False #Desactivar la banera para la siguiente iteracion 
+            conocerTurno(contador, estadoJuego.historialMovimientos) #Conocer de quien es el turno
 
+        #Dibujar el tablero 
         dibujarEstadoJuego(pantalla, estadoJuego) #Dibujar el estado actual del juego 
         reloj.tick(maxFPS) #El juego no se ejecuta a mas de "maxFPS" fotogramas por segundo 
         p.display.flip() #Doble buffering, se intercambian los buffers, mostrando el buffer fuera de la pantalla en la pantalla y ocultando el buffer previamente visible.
