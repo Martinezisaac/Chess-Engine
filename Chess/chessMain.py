@@ -77,7 +77,7 @@ def main():
     reloj = p.time.Clock()
     pantalla.fill(p.Color("White")) #Llenar el tablero de piezas blancas
     cargarImagenes() #Cargar imagenes 
-    # print(estadoJuego.tablero) #Imprimir el tablero de juego 
+    #print(estadoJuego.tablero) #Imprimir el tablero de juego 
 
     #Variables auxiliares
     contador = 1 #Contador auxiliar para mantener el control de turnos 
@@ -124,6 +124,7 @@ def main():
                         print("Movimientos validos antes de hacer la jugada: ", movimientosValidos) 
                         estadoJuego.hacerJugada(jugada) #Realizar la jugada
                         movimientoValido = True #Entonces si se realizo un movimiento valido 
+                        print(estadoJuego.tableroConsola())
 
                     else: #Entonces no se realizo una jugada valida
                         print("Jugada no valida") #Mensaje de confirmacion al usuario

@@ -90,6 +90,8 @@ class gameState():
 
 
     def movimientoPeones(self, fila, columna, movimientos): #Agregar a la lista todos los movimientos validos del peon
+        peonPasanteComido = False #Variable auxiliar para comer peones pasantes 
+
         #El peon tiene tres movimientos
             #1. Avanzar una casilla hacia adelante
             #2. Si el peon avanza por primera vez y no hay ninguna pieza bloqueandolo, puede avanzar dos casillas
@@ -97,7 +99,7 @@ class gameState():
             #El peon tambien tiene una regla especial, el peon pasante 
 
         if self.movimientoBlancas: #Validar si es el movimiento de las blancas
-            #Movimiento de las blancas
+            #Movimiento de los peones blancos
             if self.tablero[fila-1][columna] == '--': #Validar si existe una pieza delante del peon 
                 movimientos.append(Movimiento((fila, columna), (fila-1, columna), self.tablero)) #Avanzar una casilla: Agregar movimientos validos del peon para avanzar una casilla
                 if fila == 6 and self.tablero[fila-2][columna] == '--': #Validar si es el primer movimiento y que no existan piezas bloqueando la casilla 
@@ -110,11 +112,29 @@ class gameState():
                 if self.tablero[fila-1][columna+1][0] == "b": #Validar si la pieza es negra y no blanca
                     movimientos.append(Movimiento((fila, columna), (fila-1, columna+1), self.tablero)) #Generar un movimiento y eliminar la pieza negra por la derecha 
 
+            #Regla del peon pasante
+            #if self.tablero[fila][columna-1] == 'bPawn' and self.movimientoBlancas == True: #Validar si existe un peon por la izquierda de un peon negro y que no sea el turno de las blancas
+                #if self.tablero[fila-1][columna-1]: #Validar si no existe un peon detras del otro, para evitar comer dos peones 
+                    #movimientos.append(Movimiento((fila, columna), (fila-1, columna-1), self.tablero)) #Avanzar el peon blanco por el lado izquierdo
+                    # self.tablero[fila][columna-1] = '--' #Eliminar el peon negro
+
+                
         else: #Entonces ya no es turno de las blancas 
-            movimientos.append(Movimiento((fila,columna), (fila+1,columna), self.tablero)) 
-            #Generar los movimientos de los peones negros
-            #...
-            #...
+            #Movimiento de los peones negros
+            #A diferencia de las piezas blancas, las piezas negras avanzan +1 en el arreglo, es necesario validar que la fila no supere el tamaño del arreglo, el cual es de 8 (va de 0 a 7)
+
+            if ((fila + 1) != 8): #Validar que un movimiento no exceda el limite del arreglo
+                if self.tablero[fila+1][columna] == '--': #Validar si existe una pieza delante del peon
+                    movimientos.append(Movimiento((fila, columna), (fila+1, columna), self.tablero)) #Avanzar una casilla: Agregar movimientos validos del peon para avanzar una casilla
+                    if fila == 1 and self.tablero[fila+2][columna] == '--': #Validar si es el primer movimiento y que no existan piezas bloqueando la casilla 
+                        movimientos.append(Movimiento((fila, columna), (fila+2, columna), self.tablero)) #Avanzar dos casillas: Agregar movimientos validos del primer movimiento del peon para avanzar dos casillas
+
+                if columna-1 >= 0: #Validar que no exceda los limites del tablero
+                    if self.tablero[fila+1][columna-1][0] == "w": #Validar si la pieza es blanca y no negra
+                        movimientos.append(Movimiento((fila, columna), (fila+1, columna-1), self.tablero)) #Generar un movimiento y eliminar la pieza negra por la izquierda
+                if columna+1 <= 7: #Validar que no exceda los limites del tablero 
+                    if self.tablero[fila+1][columna+1][0] == "w": #Validar si la pieza es blanca y no negra
+                        movimientos.append(Movimiento((fila, columna), (fila+1, columna+1), self.tablero)) #Generar un movimiento y eliminar la pieza negra por la derecha
             
     def movimientoTorres(self, fila, columna, movimiento): #Agregar a la lista todos los movimientos validos de la torre 
         pass
