@@ -3,10 +3,11 @@
 #Librerias
 import pygame as p
 from Chess import chessEngine
+from PIL import Image
 
 # Tablero 
-anchura = 512 #Tamaño px de anchura para el tablero 
-altura = 512 #Tamaño px de altura para el tablero 
+anchura = 768 #Tamaño px de anchura para el tablero 
+altura = 768 #Tamaño px de altura para el tablero 
 #Tambien es posible utilizar '400' para la anchura y altura del juego 
 dimension = 8 #Cantidad de casillas por fila 
 maxFPS = 15 #Fotogramas para animaciones 
@@ -18,8 +19,9 @@ def cargarImagenes():
     piezas = ['bPawn', 'bKnight', 'bBishop', 'bRook', 'bQueen', 'bKing', 'wPawn', 'wKnight', 'wBishop', 'wRook', 'wQueen', 'wKing'] #Lista con el nombre de las piezas dentro de la carpeta "imagenesPiezas"
 
     for pieza in piezas: #Iterar las imagenes dentro de la carpeta "imagenesPiezas"
-        imagenes[pieza] = p.transform.scale(p.image.load("Chess/Chess/imagenesPiezas/" + pieza + ".png"), (tamañoCuadros, tamañoCuadros)) #Cargar cada una de las imagenes de las piezas del juego 
-        #De igual manera se realiza un escalado de imagenes 
+        image = Image.open("Chess/Chess/imagenesPiezas/" + pieza + ".png") #Obtener la ruta de las imagenes del juego
+        image = image.resize((tamañoCuadros, tamañoCuadros), Image.LANCZOS) #Renderizar las imagenes | Antialiasing 
+        imagenes[pieza] = p.image.fromstring(image.tobytes(), image.size, image.mode) # Crear una superficie de PyGame a partir de la cadena de bytes de la imagen redimensionada
 
 #Dibujar los cuadros del tablero
 #Nota: El cuadro superior izquierdo siempre es de color blanco 
